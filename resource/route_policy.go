@@ -18,8 +18,8 @@ type RoutePolicyList struct {
 }
 
 type RoutePolicyRelationships struct {
-	Route        ToOneRelationship `json:"route,omitempty"`
-	App          ToOneRelationship `json:"app,omitempty"`
-	Space        ToOneRelationship `json:"space,omitempty"`
-	Organization ToOneRelationship `json:"organization,omitempty"`
+	Route        *ToOneRelationship `json:"route,omitempty"`
+	App          *ToOneRelationship `json:"app,omitempty"`
+	Space        *ToOneRelationship `json:"space,omitempty"`
+	Organization *ToOneRelationship `json:"organization,omitempty"`
 }
