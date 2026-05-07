@@ -111,6 +111,7 @@ func New(config *config.Config) (*Client, error) {
 	client.Roles = (*RoleClient)(&client.common)
 	client.Root = (*RootClient)(&client.common)
 	client.Routes = (*RouteClient)(&client.common)
+	client.RoutePolicies = (*RoutePolicyClient)(&client.common)
 	client.SecurityGroups = (*SecurityGroupClient)(&client.common)
 	client.ServiceBrokers = (*ServiceBrokerClient)(&client.common)
 	client.ServiceCredentialBindings = (*ServiceCredentialBindingClient)(&client.common)
