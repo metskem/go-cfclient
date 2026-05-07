@@ -46,6 +46,7 @@ type Client struct {
 	Roles                     *RoleClient
 	Root                      *RootClient
 	Routes                    *RouteClient
+	RoutePolicies             *RoutePolicyClient
 	SecurityGroups            *SecurityGroupClient
 	ServiceBrokers            *ServiceBrokerClient
 	ServiceCredentialBindings *ServiceCredentialBindingClient
