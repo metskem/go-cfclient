@@ -17,6 +17,7 @@ type RoutePolicyListOptions struct {
 	RouteGUIDs        Filter `qs:"route_guids"`
 	SpaceGUIDs        Filter `qs:"space_guids"`
 	SourceGUIDs       Filter `qs:"source_guids"`
+	Sources           Filter `qs:"sources"`
 	OrganizationGUIDs Filter `qs:"organization_guids"`
 }
 
