@@ -105,6 +105,7 @@ func (c *RoutePolicyClient) List(ctx context.Context, opts *RoutePolicyListOptio
 	if opts == nil {
 		opts = NewRoutePolicyListOptions()
 	}
+	opts.Include = resource.RoutePolicyIncludeNone
 
 	var res resource.RoutePolicyList
 	err := c.client.list(ctx, "/v3/route_policies", opts.ToQueryString, &res)
