@@ -41,7 +41,8 @@ type RoutePolicyIncluded struct {
 type RoutePolicyIncludeType int
 
 const (
-	RoutePolicyIncludeRoute RoutePolicyIncludeType = iota
+	RoutePolicyIncludeNone RoutePolicyIncludeType = iota
+	RoutePolicyIncludeRoute
 	RoutePolicyIncludeSource
 	RoutePolicyIncludeRouteSource
 )
