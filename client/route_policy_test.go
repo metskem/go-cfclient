@@ -344,7 +344,7 @@ func TestRoutePolicies(t *testing.T) {
 			},
 			Expected: g.Array(routePolicy),
 			Action: func(c *Client, t *testing.T) (any, error) {
-				policies, _, _, err := c.RoutePolicies.ListIncludeSource(context.Background(), NewRoutePolicyListOptions())
+				policies, _, _, _, _, err := c.RoutePolicies.ListIncludeSource(context.Background(), NewRoutePolicyListOptions())
 				return policies, err
 			},
 		},
@@ -362,7 +362,7 @@ func TestRoutePolicies(t *testing.T) {
 			},
 			Expected:  g.Array(routePolicy, routePolicy2),
 			Expected2: g.Array(app1, app2),
-			Action2: func(c *Client, t *testing.T) (any, any, error) {
+			Action4: func(c *Client, t *testing.T) (any, any, any, any, error) {
 				return c.RoutePolicies.ListIncludeSourceAll(context.Background(), nil)
 			},
 		},

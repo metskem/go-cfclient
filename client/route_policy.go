@@ -165,7 +165,7 @@ func (c *RoutePolicyClient) ListIncludeRouteAll(ctx context.Context, opts *Route
 }
 
 // ListIncludeSource page all route policies the user has access to and include the associated source apps
-func (c *RoutePolicyClient) ListIncludeSource(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.App, *Pager, error) {
+func (c *RoutePolicyClient) ListIncludeSource(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.App, []*resource.Space, []*resource.Organization, *Pager, error) {
 	if opts == nil {
 		opts = NewRoutePolicyListOptions()
 	}
@@ -174,33 +174,37 @@ func (c *RoutePolicyClient) ListIncludeSource(ctx context.Context, opts *RoutePo
 	var res resource.RoutePolicyList
 	err := c.client.list(ctx, "/v3/route_policies", opts.ToQueryString, &res)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, nil, nil, nil, err
 	}
 	pager := NewPager(res.Pagination)
-	return res.Resources, res.Included.Apps, pager, nil
+	return res.Resources, res.Included.Apps, res.Included.Spaces, res.Included.Organizations, pager, nil
 }
 
 // ListIncludeSourceAll retrieves all route policies the user has access to and include the associated source apps
-func (c *RoutePolicyClient) ListIncludeSourceAll(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.App, error) {
+func (c *RoutePolicyClient) ListIncludeSourceAll(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.App, []*resource.Space, []*resource.Organization, error) {
 	if opts == nil {
 		opts = NewRoutePolicyListOptions()
 	}
 
 	var all []*resource.RoutePolicy
 	var allApps []*resource.App
+	var allSpaces []*resource.Space
+	var allOrganizations []*resource.Organization
 	for {
-		page, apps, pager, err := c.ListIncludeSource(ctx, opts)
+		page, apps, spaces, orgs, pager, err := c.ListIncludeSource(ctx, opts)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, nil, err
 		}
 		all = append(all, page...)
 		allApps = append(allApps, apps...)
+		allSpaces = append(allSpaces, spaces...)
+		allOrganizations = append(allOrganizations, orgs...)
 		if !pager.HasNextPage() {
 			break
 		}
 		pager.NextPage(opts)
 	}
-	return all, allApps, nil
+	return all, allApps, allSpaces, allOrganizations, nil
 }
 
 // Single returns a single route policy matching the options or an error if not exactly 1 match
