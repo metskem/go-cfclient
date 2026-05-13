@@ -12,6 +12,10 @@ type RoutePolicyCreate struct {
 	Source        string                   `json:"source"`
 }
 
+type RoutePolicyUpdate struct {
+	Metadata *Metadata `json:"metadata,omitempty"`
+}
+
 type RoutePolicyList struct {
 	Pagination Pagination           `json:"pagination"`
 	Resources  []*RoutePolicy       `json:"resources"`

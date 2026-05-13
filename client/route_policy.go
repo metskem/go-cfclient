@@ -214,3 +214,13 @@ func (c *RoutePolicyClient) Single(ctx context.Context, opts *RoutePolicyListOpt
 		return c.List(ctx, opts)
 	})
 }
+
+// Update the specified attributes of the route policy
+func (c *RoutePolicyClient) Update(ctx context.Context, guid string, r *resource.RoutePolicyUpdate) (*resource.RoutePolicy, error) {
+	var routePolicy resource.RoutePolicy
+	_, err := c.client.patch(ctx, path.Format("/v3/route_policies/%s", guid), r, &routePolicy)
+	if err != nil {
+		return nil, err
+	}
+	return &routePolicy, nil
+}

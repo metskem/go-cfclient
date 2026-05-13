@@ -366,6 +366,25 @@ func TestRoutePolicies(t *testing.T) {
 				return c.RoutePolicies.ListIncludeSourceAll(context.Background(), nil)
 			},
 		},
+		{
+			Description: "Update route policy",
+			Route: testutil.MockRoute{
+				Method:   "PATCH",
+				Endpoint: "/v3/route_policies/c8dcf27f-39a3-466a-9cbf-1d3c31a43b93",
+				Output:   g.Single(routePolicy),
+				Status:   http.StatusOK,
+				PostForm: `{ "metadata": { "labels": {"key": "value"}, "annotations": {"note": "detailed information"}}}`,
+			},
+			Expected: routePolicy,
+			Action: func(c *Client, t *testing.T) (any, error) {
+				r := &resource.RoutePolicyUpdate{
+					Metadata: resource.NewMetadata().
+						WithLabel("", "key", "value").
+						WithAnnotation("", "note", "detailed information"),
+				}
+				return c.RoutePolicies.Update(context.Background(), "c8dcf27f-39a3-466a-9cbf-1d3c31a43b93", r)
+			},
+		},
 	}
 	ExecuteTests(tests, t)
 }
