@@ -14,6 +14,7 @@ type RoutePolicyClient commonClient
 type RoutePolicyListOptions struct {
 	*ListOptions
 
+	GUIDs             Filter `qs:"guids"`
 	RouteGUIDs        Filter `qs:"route_guids"`
 	SpaceGUIDs        Filter `qs:"space_guids"`
 	SourceGUIDs       Filter `qs:"source_guids"`
