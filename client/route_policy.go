@@ -14,12 +14,13 @@ type RoutePolicyClient commonClient
 type RoutePolicyListOptions struct {
 	*ListOptions
 
-	GUIDs             Filter `qs:"guids"`
-	RouteGUIDs        Filter `qs:"route_guids"`
-	SpaceGUIDs        Filter `qs:"space_guids"`
-	SourceGUIDs       Filter `qs:"source_guids"`
-	Sources           Filter `qs:"sources"`
-	OrganizationGUIDs Filter `qs:"organization_guids"`
+	GUIDs             Filter                          `qs:"guids"`
+	RouteGUIDs        Filter                          `qs:"route_guids"`
+	SpaceGUIDs        Filter                          `qs:"space_guids"`
+	SourceGUIDs       Filter                          `qs:"source_guids"`
+	Sources           Filter                          `qs:"sources"`
+	OrganizationGUIDs Filter                          `qs:"organization_guids"`
+	Include           resource.RoutePolicyIncludeType `qs:"include"`
 }
 
 // NewRoutePolicyListOptions creates new options to pass to list
@@ -65,6 +66,40 @@ func (c *RoutePolicyClient) Get(ctx context.Context, guid string) (*resource.Rou
 	return &routePolicy, nil
 }
 
+// GetIncludeRoute retrieves the specified route policy and include the associated route
+func (c *RoutePolicyClient) GetIncludeRoute(ctx context.Context, guid string) (*resource.RoutePolicy, *resource.Route, error) {
+	var res resource.RoutePolicyList
+	err := c.client.get(ctx, path.Format("/v3/route_policies/%s?include=%s", guid, resource.RoutePolicyIncludeRoute), &res)
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(res.Resources) == 0 {
+		return nil, nil, err
+	}
+	var route *resource.Route
+	if res.Included != nil && len(res.Included.Routes) > 0 {
+		route = res.Included.Routes[0]
+	}
+	return res.Resources[0], route, nil
+}
+
+// GetIncludeSource retrieves the specified route policy and include the associated source app
+func (c *RoutePolicyClient) GetIncludeSource(ctx context.Context, guid string) (*resource.RoutePolicy, *resource.App, error) {
+	var res resource.RoutePolicyList
+	err := c.client.get(ctx, path.Format("/v3/route_policies/%s?include=%s", guid, resource.RoutePolicyIncludeSource), &res)
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(res.Resources) == 0 {
+		return nil, nil, err
+	}
+	var app *resource.App
+	if res.Included != nil && len(res.Included.Apps) > 0 {
+		app = res.Included.Apps[0]
+	}
+	return res.Resources[0], app, nil
+}
+
 // List pages all the route policies the user has access to
 func (c *RoutePolicyClient) List(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, *Pager, error) {
 	if opts == nil {
@@ -88,6 +123,84 @@ func (c *RoutePolicyClient) ListAll(ctx context.Context, opts *RoutePolicyListOp
 	return AutoPage[*RoutePolicyListOptions, *resource.RoutePolicy](opts, func(opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, *Pager, error) {
 		return c.List(ctx, opts)
 	})
+}
+
+// ListIncludeRoute page all route policies the user has access to and include the associated routes
+func (c *RoutePolicyClient) ListIncludeRoute(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.Route, *Pager, error) {
+	if opts == nil {
+		opts = NewRoutePolicyListOptions()
+	}
+	opts.Include = resource.RoutePolicyIncludeRoute
+
+	var res resource.RoutePolicyList
+	err := c.client.list(ctx, "/v3/route_policies", opts.ToQueryString, &res)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	pager := NewPager(res.Pagination)
+	return res.Resources, res.Included.Routes, pager, nil
+}
+
+// ListIncludeRouteAll retrieves all route policies the user has access to and include the associated routes
+func (c *RoutePolicyClient) ListIncludeRouteAll(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.Route, error) {
+	if opts == nil {
+		opts = NewRoutePolicyListOptions()
+	}
+
+	var all []*resource.RoutePolicy
+	var allRoutes []*resource.Route
+	for {
+		page, routes, pager, err := c.ListIncludeRoute(ctx, opts)
+		if err != nil {
+			return nil, nil, err
+		}
+		all = append(all, page...)
+		allRoutes = append(allRoutes, routes...)
+		if !pager.HasNextPage() {
+			break
+		}
+		pager.NextPage(opts)
+	}
+	return all, allRoutes, nil
+}
+
+// ListIncludeSource page all route policies the user has access to and include the associated source apps
+func (c *RoutePolicyClient) ListIncludeSource(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.App, *Pager, error) {
+	if opts == nil {
+		opts = NewRoutePolicyListOptions()
+	}
+	opts.Include = resource.RoutePolicyIncludeSource
+
+	var res resource.RoutePolicyList
+	err := c.client.list(ctx, "/v3/route_policies", opts.ToQueryString, &res)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	pager := NewPager(res.Pagination)
+	return res.Resources, res.Included.Apps, pager, nil
+}
+
+// ListIncludeSourceAll retrieves all route policies the user has access to and include the associated source apps
+func (c *RoutePolicyClient) ListIncludeSourceAll(ctx context.Context, opts *RoutePolicyListOptions) ([]*resource.RoutePolicy, []*resource.App, error) {
+	if opts == nil {
+		opts = NewRoutePolicyListOptions()
+	}
+
+	var all []*resource.RoutePolicy
+	var allApps []*resource.App
+	for {
+		page, apps, pager, err := c.ListIncludeSource(ctx, opts)
+		if err != nil {
+			return nil, nil, err
+		}
+		all = append(all, page...)
+		allApps = append(allApps, apps...)
+		if !pager.HasNextPage() {
+			break
+		}
+		pager.NextPage(opts)
+	}
+	return all, allApps, nil
 }
 
 // Single returns a single route policy matching the options or an error if not exactly 1 match

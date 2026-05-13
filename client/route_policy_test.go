@@ -13,6 +13,10 @@ func TestRoutePolicies(t *testing.T) {
 	g := testutil.NewObjectJSONGenerator()
 	routePolicy := g.RoutePolicy().JSON
 	routePolicy2 := g.RoutePolicy().JSON
+	route1 := g.Route().JSON
+	route2 := g.Route().JSON
+	app1 := g.Application().JSON
+	app2 := g.Application().JSON
 
 	tests := []RouteTest{
 		{
@@ -78,6 +82,42 @@ func TestRoutePolicies(t *testing.T) {
 			Expected: routePolicy,
 			Action: func(c *Client, t *testing.T) (any, error) {
 				return c.RoutePolicies.Get(context.Background(), "c8dcf27f-39a3-466a-9cbf-1d3c31a43b93")
+			},
+		},
+		{
+			Description: "Get route policy with include route",
+			Route: testutil.MockRoute{
+				Method:   "GET",
+				Endpoint: "/v3/route_policies/c8dcf27f-39a3-466a-9cbf-1d3c31a43b93",
+				Output: g.PagedWithInclude(
+					testutil.PagedResult{
+						Resources: []string{routePolicy},
+						Routes:    []string{route1},
+					}),
+				Status: http.StatusOK,
+			},
+			Expected:  routePolicy,
+			Expected2: route1,
+			Action2: func(c *Client, t *testing.T) (any, any, error) {
+				return c.RoutePolicies.GetIncludeRoute(context.Background(), "c8dcf27f-39a3-466a-9cbf-1d3c31a43b93")
+			},
+		},
+		{
+			Description: "Get route policy with include source",
+			Route: testutil.MockRoute{
+				Method:   "GET",
+				Endpoint: "/v3/route_policies/c8dcf27f-39a3-466a-9cbf-1d3c31a43b93",
+				Output: g.PagedWithInclude(
+					testutil.PagedResult{
+						Resources: []string{routePolicy},
+						Apps:      []string{app1},
+					}),
+				Status: http.StatusOK,
+			},
+			Expected:  routePolicy,
+			Expected2: app1,
+			Action2: func(c *Client, t *testing.T) (any, any, error) {
+				return c.RoutePolicies.GetIncludeSource(context.Background(), "c8dcf27f-39a3-466a-9cbf-1d3c31a43b93")
 			},
 		},
 		{
@@ -260,6 +300,70 @@ func TestRoutePolicies(t *testing.T) {
 				}
 				policies, _, err := c.RoutePolicies.List(context.Background(), opts)
 				return policies, err
+			},
+		},
+		{
+			Description: "List route policies with include route",
+			Route: testutil.MockRoute{
+				Method:   "GET",
+				Endpoint: "/v3/route_policies",
+				Output:   g.SinglePaged(routePolicy),
+				Status:   http.StatusOK,
+			},
+			Expected: g.Array(routePolicy),
+			Action: func(c *Client, t *testing.T) (any, error) {
+				policies, _, _, err := c.RoutePolicies.ListIncludeRoute(context.Background(), NewRoutePolicyListOptions())
+				return policies, err
+			},
+		},
+		{
+			Description: "List all route policies with include route",
+			Route: testutil.MockRoute{
+				Method:   "GET",
+				Endpoint: "/v3/route_policies",
+				Output: g.PagedWithInclude(
+					testutil.PagedResult{
+						Resources: []string{routePolicy, routePolicy2},
+						Routes:    []string{route1, route2},
+					}),
+				Status: http.StatusOK,
+			},
+			Expected:  g.Array(routePolicy, routePolicy2),
+			Expected2: g.Array(route1, route2),
+			Action2: func(c *Client, t *testing.T) (any, any, error) {
+				return c.RoutePolicies.ListIncludeRouteAll(context.Background(), nil)
+			},
+		},
+		{
+			Description: "List route policies with include source",
+			Route: testutil.MockRoute{
+				Method:   "GET",
+				Endpoint: "/v3/route_policies",
+				Output:   g.SinglePaged(routePolicy),
+				Status:   http.StatusOK,
+			},
+			Expected: g.Array(routePolicy),
+			Action: func(c *Client, t *testing.T) (any, error) {
+				policies, _, _, err := c.RoutePolicies.ListIncludeSource(context.Background(), NewRoutePolicyListOptions())
+				return policies, err
+			},
+		},
+		{
+			Description: "List all route policies with include source",
+			Route: testutil.MockRoute{
+				Method:   "GET",
+				Endpoint: "/v3/route_policies",
+				Output: g.PagedWithInclude(
+					testutil.PagedResult{
+						Resources: []string{routePolicy, routePolicy2},
+						Apps:      []string{app1, app2},
+					}),
+				Status: http.StatusOK,
+			},
+			Expected:  g.Array(routePolicy, routePolicy2),
+			Expected2: g.Array(app1, app2),
+			Action2: func(c *Client, t *testing.T) (any, any, error) {
+				return c.RoutePolicies.ListIncludeSourceAll(context.Background(), nil)
 			},
 		},
 	}

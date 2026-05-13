@@ -13,8 +13,9 @@ type RoutePolicyCreate struct {
 }
 
 type RoutePolicyList struct {
-	Pagination Pagination     `json:"pagination"`
-	Resources  []*RoutePolicy `json:"resources"`
+	Pagination Pagination           `json:"pagination"`
+	Resources  []*RoutePolicy       `json:"resources"`
+	Included   *RoutePolicyIncluded `json:"included"`
 }
 
 type RoutePolicyRelationships struct {
@@ -22,4 +23,38 @@ type RoutePolicyRelationships struct {
 	App          *ToOneRelationship `json:"app,omitempty"`
 	Space        *ToOneRelationship `json:"space,omitempty"`
 	Organization *ToOneRelationship `json:"organization,omitempty"`
+}
+
+type RoutePolicyWithIncluded struct {
+	RoutePolicy RoutePolicy          `json:"route_policy"`
+	Included    *RoutePolicyIncluded `json:"included"`
+}
+
+type RoutePolicyIncluded struct {
+	Routes        []*Route        `json:"routes"`
+	Apps          []*App          `json:"apps"`
+	Spaces        []*Space        `json:"spaces"`
+	Organizations []*Organization `json:"organizations"`
+}
+
+// RoutePolicyIncludeType https://v3-apidocs.cloudfoundry.org/version/3.126.0/index.html#include
+type RoutePolicyIncludeType int
+
+const (
+	RoutePolicyIncludeRoute RoutePolicyIncludeType = iota
+	RoutePolicyIncludeSource
+	RoutePolicyIncludeRouteSource
+)
+
+func (r RoutePolicyIncludeType) String() string {
+	switch r {
+	case RoutePolicyIncludeRoute:
+		return "route"
+	case RoutePolicyIncludeSource:
+		return "source"
+	case RoutePolicyIncludeRouteSource:
+		return "route,source"
+	default:
+		return ""
+	}
 }
